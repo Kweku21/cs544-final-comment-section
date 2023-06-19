@@ -1,13 +1,12 @@
 package comment.models;
 
-import jakarta.persistence.*;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
+import javax.persistence.*;
+import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.UUID;
 
@@ -19,11 +18,11 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Comment {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     @Lob
     private String comment;
-    private UUID post_id;
-    private UUID user_id;
+    private Long post_id;
+    private String user_id;
     private Date created_at = new Date();
 }

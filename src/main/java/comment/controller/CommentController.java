@@ -5,50 +5,61 @@ import comment.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/vi/comment")
+@RequestMapping("/v1/{post_id}/comment")
 public class CommentController {
+
+    @Autowired
+    OAuth2RestTemplate restTemplate;
+
+    public String getUserName(){
+        return restTemplate.getForObject("http://localhost:8088/user/id", String.class);
+    }
 
     @Autowired
     private CommentService commentService;
 
     @GetMapping("/{id}")
-    public Comment getComment(@PathVariable UUID id){
+    public Comment getComment(@PathVariable Long id, @PathVariable String post_id){
         return commentService.getComment(id);
     }
 
-    @GetMapping("/post/{post_id}")
-    public List<Comment> getPostComments(@PathVariable UUID post_id){
+    @GetMapping("")
+    public List<Comment> getPostComments(@PathVariable Long post_id){
         return commentService.getPostComment(post_id);
     }
 
-    @GetMapping("/{post_id}/user/{user_id}")
-    public List<Comment> getPostUserComments(@PathVariable UUID post_id, @PathVariable UUID user_id){
+    @GetMapping("/user")
+    public List<Comment> getPostUserComments(@PathVariable Long post_id){
+        String user_id = this.getUserName();
         return commentService.getPostUserComment(post_id, user_id);
     }
 
-    @PostMapping("/create/{post_id}/user/{user_id}")
-    public Comment createComment(@PathVariable UUID post_id, @PathVariable UUID user_id, @RequestBody Comment comment){
+    @PostMapping("/create")
+    public Comment createComment(@PathVariable Long post_id, @RequestBody Comment comment){
+        String user_id = this.getUserName();
         comment.setPost_id(post_id);
         comment.setUser_id(user_id);
         return commentService.createComment(comment);
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateComment(@PathVariable UUID id, @RequestBody Comment comment){
-        commentService.checkUserOwnsComment(comment.getUser_id(), id);
+    @PutMapping("/update/{comment_id}")
+    public ResponseEntity<?> updateComment(@PathVariable Long comment_id, @RequestBody Comment comment){
+        String user_id = this.getUserName();
+        commentService.checkUserOwnsComment(user_id, comment_id);
         return new ResponseEntity<>(commentService.updateComment(comment), HttpStatus.OK);
     }
 
-    @DeleteMapping("/{user_id}/delete/{id}")
-    public ResponseEntity<?> deleteComment(@PathVariable UUID id, @PathVariable UUID user_id){
-        commentService.checkUserOwnsComment(user_id, id);
-        commentService.deleteComment(id);
+    @DeleteMapping("/delete/{comment_id}")
+    public ResponseEntity<?> deleteComment(@PathVariable Long comment_id, @PathVariable String post_id){
+        String user_id = this.getUserName();
+        commentService.checkUserOwnsComment(user_id, comment_id);
+        commentService.deleteComment(comment_id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

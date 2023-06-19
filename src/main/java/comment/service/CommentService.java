@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class CommentService {
@@ -19,19 +18,19 @@ public class CommentService {
         return commentRepo.findAll();
     }
 
-    public void checkUserOwnsComment(UUID user_id, UUID comment_id){
+    public void checkUserOwnsComment(String user_id, Long comment_id){
         commentRepo.findByIdAndUser_id(comment_id, user_id).orElseThrow(
                 () -> new UserNotOwnerException("User is not the owner of this blog")
         );
     }
 
-    public List<Comment> getPostComment(UUID post_id){ return commentRepo.findByPost_id(post_id);}
+    public List<Comment> getPostComment(Long post_id){ return commentRepo.findByPost_id(post_id);}
 
-    public List<Comment> getPostUserComment(UUID post_id, UUID user_id) {
+    public List<Comment> getPostUserComment(Long post_id, String user_id) {
         return commentRepo.findByPost_idAndUser_id(post_id, user_id);
     }
 
-    public List<Comment> getUserComment(UUID id){
+    public List<Comment> getUserComment(String id){
         return commentRepo.findByUser_id(id);
     }
 
@@ -43,11 +42,11 @@ public class CommentService {
         return commentRepo.save(comment);
     }
 
-    public Comment getComment(UUID id){
+    public Comment getComment(Long id){
         return commentRepo.findById(id).get();
     }
 
-    public void deleteComment(UUID id){
+    public void deleteComment(Long id){
         commentRepo.deleteById(id);
     }
 }
